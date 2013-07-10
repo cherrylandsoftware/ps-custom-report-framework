@@ -1,0 +1,37 @@
+~[if#action.~(gpv.action)=getdcid]
+~[tlist_sql;SELECT dcid FROM gen WHERE cat='crm' AND name='reportcache' AND value='~(gpv.category)' AND rownum <=1;nonemessage=-99]~(f1;l)[/tlist_sql]
+[/if#action]
+~[if#action.~(gpv.action)=getparams]
+{
+"ac":"prim",
+"frn":"~(gpv.frn)",
+"~(JSFieldParam;[06]cat)":"crm",
+"~(JSFieldParam;[06]name)":"reportcache",
+"~(JSFieldParam;[06]value)":"~(gpv.category)",
+"~(JSFieldParam;[06]ValueT)":"",
+"~(JSFieldParam;[06]Date)":"~[date]",
+"~(JSFieldParam;[06]Time1)":"~[time]",
+"junkform":"<form name='junkform' ><input type='hidden' name='ac' value='prim' /><input name='~(JSFieldParam;[06]cat)' /><input name='~(JSFieldParam;[06]name)' /><input name='~(JSFieldParam;[06]value)' /><input name='~(JSFieldParam;[06]valueT)' /><input name='~(JSFieldParam;[06]date)' /><input name='~(JSFieldParam;[06]time1)' /></form>"
+
+}
+[/if#action]
+~[if#action.~(gpv.action)=getcacheage]
+~[tlist_sql;
+SELECT
+trunc(
+ EXTRACT(DAY FROM diff) * 86400 +
+ EXTRACT(HOUR FROM diff) * 3600 +
+ EXTRACT(MINUTE FROM diff) * 60 +
+ EXTRACT(SECOND FROM diff)
+) as totalsecs
+FROM
+(SELECT systimestamp - (date_value + (time1/86400)) as diff FROM gen WHERE cat='crm' AND name ='reportcache' AND rownum <=1) x;
+nonemessage=-1]
+~(f1;l)
+[/tlist_sql]
+[/if#action]
+~[if#action.~(gpv.action)=getcache]
+~[tlist_sql;SELECT ValueT FROM gen WHERE cat='crm' AND name='reportcache' AND value='ALL' ORDER BY value;]
+~(f1;t)
+[/tlist_sql]
+[/if#action]

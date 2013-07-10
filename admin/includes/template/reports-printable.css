@@ -1,0 +1,55 @@
+.noprint{
+  display:none;
+}
+.rounded_block {
+  border:none;
+  padding:0px;
+  margin:0px;
+}
+.pbreak {
+  page-break-before:always;
+}
+a:visited {
+	text-decoration: none;
+	color: #000000;
+}
+a:link {
+	text-decoration: none;
+	color: #000000;
+}
+a:active {
+	text-decoration: none;
+	color: #000000;
+}
+body {
+  margin:0px;
+  padding:0px;
+}
+#reportcontent {
+  border:none;
+  box-shadow:none;
+  padding:0px;
+  margin:0.25in;
+}
+/*DataTables */
+.dataTables_info {
+	display:none;
+}
+.DataTables_sort_wrapper span {
+	display:none;
+}
+.dataTables_wrapper div.fg-toolbar {
+	display:none;
+}
+.dataTables_wrapper {
+	display:block;
+}
+
+/*Hide PS7 layout components*/
+#header {
+  display:none;
+}
+#container {
+  margin:0;
+  min-width:0;
+}

@@ -1,0 +1,273 @@
+/*  Core distribution of custom dashboards released with Custom Reports Bundle.
+	Add new dashboard tabs to /admin/dashboards/dashboard-ext.js
+*/
+
+/*
+//Attendance Dashboard
+DashboardManager.addDashboard({
+	key:'core_att',
+	label:'Attendance',
+	source:'/admin/dashboards/attdashboard/portlets.html',
+	portlets:{
+		'att-dist-all-students':{
+			display:true,
+			title:'Attendance Distribution For All Students'
+		},
+		'att-by-month':{
+			display:false,
+			title:'Attendance by Month',
+			defaultoptions:{"attc":"A"}
+		},
+		'att-std-day-list':{
+			display:false,
+			title:'Student Day List',
+			defaultoptions:{"attc":"A","sch":"~(curschoolid)","yr":"-1"}
+		},
+		'att-month-day-dist':{
+			display:false,
+			title:'Day Distribution for Month',
+			defaultoptions:{"attc":"A","sch":"~(curschoolid)","yr":"-1"}			
+		},
+		'att-month-dist-pie':{
+			display:false,
+			title:'Month Distribution Pie Chart',
+			defaultoptions:{"attc":"A","sch":"~(curschoolid)"}
+		}
+	}
+});
+//Attendance Counts Dashboard
+DashboardManager.addDashboard({
+	key:'core_attcount',
+	label:'Attendance Count',
+	source:'/admin/dashboards/attcntdashboard/portlets.html',
+	portlets:{
+		'attcount-all-students':{
+			title:'Attendance Counts for All Students',
+			display:true
+		},
+		'attcount-percent-month':{
+			title:'Attendance Percent by Month',
+			display:true
+		},
+		'attcount-percent-month-last3':{
+			title:'Attendance Percent by Month for Last 3 Years',
+			display:true
+		}
+	}
+});
+//Grades Dashboard
+DashboardManager.addDashboard({
+	key:'core_grades',
+	label:'Grades',
+	source:'/admin/dashboards/gradesdashboard/portlets.html',
+	paramsUrl:'/admin/dashboards/gradesdashboard/parameters.html',
+	portlets:{
+		'grades-dist-students':{
+			title:'Grade Distribution For All Students',
+			display:true
+		},
+		'grades-dist-dept':{
+			title:'Grade Distribution By Department',
+			display:true,
+			defaultoptions:{"d":"NO DEPT"}
+		},
+		'grades-grade-list':{
+			title:'Grade Distribution List For All Students',
+			display:false,
+			selectable:false
+		},
+		'grades-teacher-dist':{
+			title:'Teacher Grade Distribution',
+			display:false
+		},
+		'grades-teacher-dist-section':{
+			title:'Teacher-Section Grade Distribution',
+			display:false,
+			selectable:false
+		},
+		'grades-course-dist':{
+			title:'Course Grade Distribution',
+			display:false,
+			selectable:false
+		},
+		'grades-view-record':{
+			title:'View Grade Record',
+			display:false,
+			selectable:false
+		},
+		'grades-student-section':{
+			title:'Students Grades in a Section',
+			display:false,
+			selectable:false
+		},
+		'grades-student-dist-section':{
+			title:'Students Grades Distribution by Section',
+			display:false,
+			selectable:false
+		}
+	}
+});
+//Single Sign On Dashboard
+DashboardManager.addDashboard({
+	key:'core_sso',
+	label:'Single Sign On',
+	source:'/admin/dashboards/sso/portlets.html',
+	portlets:{
+		'sso-num-accounts-pie':{
+			title:'Number of SSO accounts by active student',
+			display:true
+		},
+		'sso-student_list':{
+			title:'Student List',
+			display:false,
+			defaultoptions:{"num":"1"}
+		},
+		'sso-by-grade':{
+			title:'SSO accounts per student by grade',
+			display:true
+		},
+		'sso-num-students-per-sso-pie':{
+			title:'Number of active students per SSO account',
+			display:true
+		},
+		'sso-logins-per-hour':{
+			title:'SSO Logins/Hour',
+			display:true
+		},
+		'sso-logins-per-date':{
+			title:'SSO Logins/Date',
+			display:true
+		},
+		'sso-logins-per-week':{
+			title:'SSO Logins/Week',
+			display:true
+		},
+		'sso-logins-per-month':{
+			title:'SSO Logins/Month',
+			display:true
+		},
+		'sso-logins-per-day-of-week':{
+			title:'SSO Logins/Day of Week',
+			display:true
+		},
+		'sso-time-online':{
+			title:'Time Spent Online',
+			display:true
+		}
+	}
+});
+//Attendance Dashboard
+DashboardManager.addDashboard({
+	key:'core_students',
+	label:'Students',
+	source:'/admin/dashboards/studentdashboard/portlets.html',
+	paramsUrl:'/admin/dashboards/studentdashboard/parameters.html',
+	portlets:{
+		'student-membership-trend':{
+			display:true,
+			title:'Student Membership Trend'
+		},
+		'student-att-membership-summary':{
+			display:true,
+			title:'Student Attendance Membership Summary'
+		},
+		'student-standard-grades':{
+			display:true,
+			title:'Student Standard Grades'
+		},
+		'student-grade-dist':{
+			display:true,
+			title:'Student Grade Distribution'
+		},
+		'student-dept-trend':{
+			display:true,
+			title:'Student Department Trend'
+		},
+		'student-logins-student':{
+			display:true,
+			title:'Logins Per Week - Student'
+		},
+		'student-logins-parent':{
+			display:true,
+			title:'Logins Per Week - Parent'
+		}
+	}
+});
+//NY graduation dashboard
+DashboardManager.addDashboard({
+	key:'core_state_ny_graduation',
+	label:'State (NY)',
+	source:'/admin/dashboards/state/NY/NYgraduation/portlets.html',
+	paramsUrl:'/admin/dashboards/state/NY/NYgraduation/parameters.html',
+	show:~[if#show.~[displaypref:districtstate]=NY]true[else#show]false[/if#show],
+	portlets:{
+		'state-NY-postgrad-destination':{
+			title:'Post Graduation Destination',
+			display:true
+		},
+		'state-NY-postgrad-diplomakind':{
+			title:'Post Graduation Diploma Kind',
+			display:true
+		},
+		'state-NY-postgrad-exitreason':{
+			title:'Post Graduation Exit Reason',
+			display:true
+		},
+		'state-NY-postgrad-nongradreason':{
+			title:'Post Graduation Non-Grad Reason',
+			display:true
+		},
+		'state-NY-postgrad-gradmonth':{
+			title:'Post Graduation Month',
+			display:true
+		},
+		'state-NY-postgrad-cohort':{
+			title:'Post Graduation Cohort Years',
+			display:true
+		},
+		'state-NY-postgrad-collegeattend':{
+			title:'Post Graduation Attending College',
+			display:true
+		},
+		'state-NY-postgrad-collegemajor':{
+			title:'Post Graduation College Major',
+			display:true
+		},
+		'state-NY-postgrad-summarylist':{
+			title:'Post Graduation Summary List',
+			display:false
+		}
+	}
+});
+//VA graduation dashboard
+DashboardManager.addDashboard({
+	key:'core_state_va_graduation',
+	label:'State (VA)',
+	source:'/admin/dashboards/state/VA/VAgraduation/portlets.html',
+	paramsUrl:'/admin/dashboards/state/VA/VAgraduation/parameters.html',
+	show:~[if#show.~[displaypref:districtstate]=VA]true[else#show]false[/if#show],
+	portlets:{	
+		'state-VA-grad-diplomakind':{
+			title:'Post Graduation Destination',
+			display:true
+		},
+		'state-VA-grad-exitreason':{
+			title:'Post Graduation Diploma Kind',
+			display:true
+		},
+		'state-VA-grad-nongradreason':{
+			title:'Post Graduation Exit Reason',
+			display:true
+		},
+		'state-VA-grad-destination':{
+			title:'Post Graduation Non-Grad Reason',
+			display:true
+		},
+		'state-VA-grad-summarylist':{
+			title:'Post Graduation Summary List',
+			display:false
+		}
+	}
+});
+
+*/

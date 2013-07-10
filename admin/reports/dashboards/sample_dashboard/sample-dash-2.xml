@@ -1,0 +1,27 @@
+<graph caption="Grade Distribution by Department: ~[gpv:d]" subCaption="" bgcolor="f6f6f6"
+       yaxisname="" xaxisname="" 
+       decimalPrecision="0" formatNumberScale="0" rotatenames="1"
+       canvasBorderThickness="1">
+~[tlist_sql;
+
+SELECT trim(LetterGrade), COUNT(trim(LetterGrade)) GradeCount, gsiID, dept
+FROM (
+	SELECT UPPER(nvl(crs.Sched_Department,'No Dept')) dept,
+	  CASE WHEN LENGTH(REPLACE(TRANSLATE(sg.Grade,'-.0123456789',' '),' ')) is null THEN to_char(floor(to_number(sg.Grade)/10))||'0s' ELSE sg.Grade END LetterGrade,
+	  CASE WHEN LENGTH(REPLACE(TRANSLATE(sg.Grade,'-.0123456789',' '),' ')) is null THEN floor(to_number(sg.Grade)/10)*10 ELSE gsi.CutOffPercentage END CutOffPercentage,
+	  (SELECT min(ID) FROM GradeScaleItem WHERE Name=CASE WHEN LENGTH(REPLACE(TRANSLATE(sg.Grade,'-.0123456789',' '),' ')) is null THEN to_char(to_number(to_char(floor(to_number(sg.Grade)/10))||'0')) ELSE sg.Grade END) gsiID
+	FROM StoredGrades sg
+	  INNER JOIN GradeScaleItem gs ON gs.Name=sg.GradeScale_Name AND gs.GradeScaleID=-1
+	  INNER JOIN GradeScaleItem gsi ON gsi.GradeScaleID=gs.ID AND gsi.Name=sg.Grade
+	  LEFT JOIN Courses crs ON sg.Course_Number = crs.Course_Number
+	WHERE sg.TermID BETWEEN ~(curyearid)00 AND ~(curyearid)99
+	  AND sg.SchoolID=~(curschoolid)
+	  AND UPPER(nvl(crs.Sched_Department,'No Dept')) = to_char('~[gpv:d]')
+	  AND sg.Grade IS NOT NULL
+	  AND sg.GradeScale_Name IS NOT NULL
+	  AND trim(sg.StoreCode) IN (~[prefschool:gradeDashSC])
+) grades
+GROUP BY dept, CutOffPercentage, trim(LetterGrade), gsiID
+ORDER BY dept, CutOffPercentage DESC, GradeCount]
+	<set name="~(LetterGrade)" value="~(gradecount;l)" link="javascript:DashboardUI.addPortlet('grades-grade-list',{'gradevar':'~(gsiID;l)','d':'~(d;t)'})" />
+[/tlist_sql]</graph>

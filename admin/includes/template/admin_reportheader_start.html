@@ -1,0 +1,31 @@
+~[frame_type:none]
+<style>
+.dialog, .dialogC, .dialogM, .dialogR, .dialogF, .dialogDiv, .dialogDivC, .dialogDivM, .replaceNext { visibility: hidden;}
+</style>
+<!-- start of shell for entire page  -->
+<div id="container" class="group">
+	<!-- start of shell for entire page  -->
+	<!-- logo, school, term, logoff, help -->
+	<div id="header" class="group">
+		<ul id="tools" class="group">
+	      <li id="userName" title="~[wc:login_lastlogin]">~[text:psx.common.welcome] <span>~[x:username;firstlast]</span></li>
+		  <li><a href="javascript:helpwindow('~[x:help_pagelink]')" id="btnHelp" title="~[text:psx.common.help_title]" accesskey="?">~[text:psx.common.help]</a></li>
+		  <li><a href="~loff" id="btnLogout" target="_top" title="~[text:psx.common.sign_out_title]" accesskey="l">~[text:psx.common.sign_out]</a></li>
+		</ul>
+	    <div id="branding-powerschool">
+	    	<a href="/admin/home.html" target="_top"><img src="/images/img/ps7-logo.png" alt="PowerSchool" width="180" height="28" /></a>
+	    </div>
+		<div id="currentscope">
+			<a href="/admin/schools/changeschoolcontext.html" id="schoolContext" class="replaceNext" title="~[text:psx.common.school_title]" >~[text:psx.common.school] </a>
+			<span id="schoolText">~[schoolname]</span>
+			<a href="/admin/terms/changetermcontext.html" id="termContext" class="replaceNext" title="~[text:psx.common.term_title]" >~[text:psx.common.term] </a>
+			<span id="termText">~[termname]</span>
+	    </div>
+	</div>
+	<!--logo, school, term, logoff, help -->
+	<div id="usercontext-bar">
+	<div id="breadcrumbs">
+<a href="/admin/home.html" target="_top">Start Page</a>
+ &gt; <a href="/admin/reports/home.html">Reports</a>
+ &gt; <a href="/admin/reports/customreports.html">Reports (Custom)</a>
+ &gt;

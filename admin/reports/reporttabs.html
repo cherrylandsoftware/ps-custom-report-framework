@@ -1,0 +1,36 @@
+<!-- start of tabs -->
+<ul class="tabs">
+	<li class="~[if.~[gpv:repType]=system]selected[/if]">
+        <a href="~[if.~[gpv:repType]=system]#[else]/admin/reports/runreports.html[/if]">~[text:psx.html.admin_reports.reporttabs.system]</a>
+    </li>
+    <li class="~[if.~[gpv:repType]=power]selected[/if]">
+        <a href="~[if.~[gpv:repType]=power]#[else]/admin/reports/runprreports.html[/if]">~[text:psx.html.admin_reports.reporttabs.reportworks]</a>
+    </li>
+    <li class="~[if.~[gpv:repType]=state]selected[/if]">
+        <a href="~[if.~[gpv:repType]=state]#[else]/admin/reports/statereports.html[/if]">~[text:psx.html.admin_reports.reporttabs.state]</a>
+    </li>
+~[if.pref.credostatuscode=1]~[x:insertfile;reporttabscredo.html]
+~[x:insertfile;reporttabscredo.html]
+[/if]
+    <li class="~[if.~[gpv:repType]=engine]selected[/if]">
+    	 <a href="~[if.~[gpv:repType]=engine]#[else]/admin/reports/reportingengine.html[/if]">~[text:psx.html.admin_reports.reporttabs.engine]</a>
+    </li>  
+    <li class="~[if.~[gpv:repType]=setup]selected[/if]">
+    	 <a href="~[if.~[gpv:repType]=setup]#[else]/admin/reports/reportsetup.html[/if]">~[text:psx.html.admin_reports.reporttabs.setup]</a>
+    </li>  
+    <li class="~[if.~[gpv:repType]=customreports]selected[/if]">
+    	 <a href="~[if.~[gpv:repType]=customreports]#[else]/admin/reports/customreports.html[/if]">Custom Reports</a>
+    </li>  
+    <li class="~[if.~[gpv:repType]=customdash]selected[/if]">
+    	 <a href="~[if.~[gpv:repType]=customdash]#[else]/admin/reports/dashboards/home.html[/if]">Custom Dashboards</a>
+    </li>
+<!--check for sqlReports v2.0+ -->
+~[f.variable_create;name=itemexists;type=TEXT;when=NEVER]
+~[f.variable_set;name=itemexists;value=~(f.file;fn=test;path={{customdatadir}}web_root\admin\sqlReports\home.html);]
+~[if#sqltest.~[v.itemexists]=1]
+    <li class="~[if#selected.~[gpv:repType]=customsql]selected[/if#selected]">
+    	 <a href="~[if#selected2.~[gpv:repType]=customsql]#[else#selected2]/admin/sqlReports/home.html[/if#selected2]">Custom SQL Reports</a>
+    </li>
+[/if#sqltest]
+</ul>
+<!-- end of tabs -->

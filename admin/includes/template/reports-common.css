@@ -1,0 +1,75 @@
+body, td, p, ul, div{
+	color:inherit;
+	//color: expression(this.parentNode.currentStyle['color']);
+}
+
+#reportcontent {
+  background-color:#FFFFFF;
+  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+  clear:both;
+  border: 1px solid black;
+  padding: 0 5px;
+}
+/* Busy Dialog */
+#busydialog {
+  background:url("/images/UI_images/rel_interstitial_loading.gif") no-repeat scroll center center #FFFFFF;
+  overflow:hidden;
+  padding:5px;
+}
+/*Parameters Container*/
+#params_container {
+  display:inline-block;
+  font-size:12px;
+}
+#params_container  table {
+  width:auto;
+}
+#params_container fieldset {
+  border: 1px solid black;
+  margin: 5px 0;
+  padding: 5px;
+}
+#params_container  p {
+  margin: 5px 0;
+}
+#params_container label {
+  font-weight:bold;
+}
+#params_container select, input[type="submit"] {
+  margin: 5px 0px 0px;
+}
+
+/* Various class styles */
+hr.pageseperator {
+  border: 2px dashed #F00;
+}
+.rounded_block {
+  background-color: #FFFFFF;
+  border: 1px solid #BFD4EC;
+  -webkit-border-radius: 6px;
+  -moz-border-radius:6px;
+  border-radius:6px;
+  padding:5px;
+}
+.page {
+  width:8.5in;
+  padding: 0in .25in;
+}
+.hidden{
+  display:none;
+}
+
+/*DataTables */
+.dataTables_wrapper {
+	display:inline-block;
+}
+/*.noprint fixes*/
+tfoot.noprint{
+  margin:0;
+  padding:0;
+  display:table-footer-group;
+}
+
+#params.noprint {
+    width: 98%;
+}

@@ -1,0 +1,59 @@
+~[if#key.~(gpv.portletkey)=sample-dash-1]
+	<div>
+	<OBJECT classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" 
+		codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0" 
+		WIDTH="100%" HEIGHT="500" 
+		id="FusionCharts" ALIGN="center">
+	<PARAM NAME="movie" VALUE="/flash/Bar2D.swf">
+	<PARAM NAME="FlashVars" value="&dataURL=/admin/dashboards/gradesdashboard/gradesdist.xml&chartWidth=100%&chartHeight=500">
+	<PARAM NAME="quality" VALUE="high">
+	<PARAM NAME="bgcolor" VALUE="#f6f6f6">
+	<PARAM NAME="wmode" VALUE="opaque" />
+	<EMBED src="/flash/Bar2D.swf" 
+		FlashVars="&dataURL=/admin/reports/dashboards/sample/sample-dash-1.xml&chartWidth=100%&chartHeight=500" 
+		quality="high" bgcolor="#f6f6f6" 
+		WIDTH="100%" HEIGHT="500"
+		NAME="FusionCharts" ALIGN="center" 
+		TYPE="application/x-shockwave-flash" PLUGINSPAGE="http://www.macromedia.com/go/getflashplayer">
+	</EMBED>
+	</OBJECT>
+	</div>
+[/if#key]
+~[if#key.~(gpv.portletkey)=sample-dash-2]
+	<form class="paramform">
+		<select name="d" onChange="DashboardUI.updatePortletContent('grades-dist-dept');">
+		~[tlist_sql;
+		SELECT distinct UPPER(nvl(crs.Sched_Department,'No Dept')) dept, CASE WHEN  UPPER(nvl(crs.Sched_Department,'No Dept')) = to_char('~[gpv:d]') THEN 'selected' END isselected
+		FROM StoredGrades sg
+		  INNER JOIN GradeScaleItem gs ON gs.Name=sg.GradeScale_Name AND gs.GradeScaleID=-1
+		  INNER JOIN GradeScaleItem gsi ON gsi.GradeScaleID=gs.ID AND gsi.Name=sg.Grade
+		  LEFT JOIN Courses crs ON sg.Course_Number = crs.Course_Number
+		WHERE sg.TermID BETWEEN ~(curyearid)*100 AND ~(curyearid)*100+99
+		  AND sg.SchoolID=~(curschoolid)
+		  AND sg.Grade IS NOT NULL
+		  AND sg.GradeScale_Name IS NOT NULL
+		ORDER BY dept;]
+		<option value="~(dept;t)" ~(isselected;t)>~(dept;t)</option>
+		[/tlist_sql]
+		</select>
+	</form>
+	<div>
+	<OBJECT classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" 
+		codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0" 
+		WIDTH="100%" HEIGHT="500" 
+		id="FusionCharts" ALIGN="center">
+	<PARAM NAME="movie" VALUE="/flash/Bar2D.swf">
+	<PARAM NAME="FlashVars" value="&dataURL=/admin/reports/dashboards/sample/sample-dash-2.xml?d=~[gpv:d]">
+	<PARAM NAME="quality" VALUE="high">
+	<PARAM NAME="bgcolor" VALUE="#f6f6f6">
+	<PARAM NAME="wmode" VALUE="opaque" />
+	<EMBED src="/flash/Bar2D.swf" 
+		FlashVars="&dataURL=/admin/reports/dashboards/sample/sample-dash-2.xml?d=~[gpv:d]" 
+		quality="high" bgcolor="#f6f6f6" 
+		WIDTH="100%" HEIGHT="500"
+		NAME="FusionCharts" ALIGN="center" 
+		TYPE="application/x-shockwave-flash" PLUGINSPAGE="http://www.macromedia.com/go/getflashplayer">
+	</EMBED>
+	</OBJECT>
+	</div>
+[/if#key]

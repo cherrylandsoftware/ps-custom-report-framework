@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Custom ~[if.is.a.school]School[else]District[/if.is.a.school] Level Reports</title>
+<link href="/images/css/screen.css" rel="stylesheet" media="screen">
+<link href="/images/css/print.css" rel="stylesheet" media="print">
+~[if.pref.pdscrmdisable=1]~[redirect:/admin/reports/customreports_static.html][/if]
+<link rel="stylesheet" href="/images/css/theme/dark-hive/jquery-ui.custom.css" type="text/css">
+<style type="text/css" >
+#report_container ul {
+  padding: 0.2em 0.2em 0;
+}
+#report_container ul.ui-tabs-nav, #report_container ul.ui-tabs {
+  width:auto;
+}
+#report_container ul li {
+  margin: 0 0.2em 1px 0;
+}
+#maincontent_container h4 {
+  margin-left: 0px;
+}
+body, td, p, ul, div{
+	color:inherit;
+	//color: expression(this.parentNode.currentStyle['color']);
+}
+.button {
+  cursor:pointer;
+}
+#reportmessage {
+  margin: 10px;
+  font-size:10pt;
+  font-weight:bold;
+}
+.rounded_block {
+  background-color: #FFFFFF;
+  border: 1px solid #BFD4EC;
+  -webkit-border-radius: 6px;
+  -moz-border-radius:6px;
+  padding:5px;
+}
+
+tr.oddrow {
+  border: 1px solid #aed0ea;
+  background: #d7ebf9 url(/images/css/theme/crm-css/images/ui-bg_glass_80_d7ebf9_1x400.png) 50% 50% repeat-x;
+}
+tr.evenrow {
+  background-color:#FFFFFF;
+}
+td {
+  color:#000000;
+}
+tr.oddrow td a,tr.evenrow td a{
+  color:#3366CC;
+}
+#maincontent_container td{
+  font-size:12px;
+}
+#maincontent_container ul a{
+  font-size:12px;
+}
+div.tab_content {
+  font-size:auto;
+  width:auto;
+}
+div.tab_content, div.tab_content_sel{
+  font-size:100%;
+  width:auto;
+}
+</style>
+
+~[x:insertfile;/scripts/custom-jquery-1.0.html]
+~[x:insertfile;/scripts/custom-datatables-1.0.html]
+
+<script type="text/javascript" src="/admin/reports/c_reportmanager/config.js"></script>
+<script type="text/javascript" >
+var $c = jQuery.noConflict();
+//configuration variables loaded from config.js file defined above
+//Clean up configuration variables.
+for (var i in crm.catfilters.school){
+	crm.catfilters.school[i] = $c.map(crm.catfilters.school[i], function(a){return a.toLowerCase();});
+};
+/*Cache commonly checked preferences to avoid an AJAX request
+[key]= preference name
+[value] = Current value of preference
+*/
+//number of seconds that cache will be used before a rescan
+crm.cache.expirelength = ~[if.pref.gvu-CUST_enablecustompageservice=1]3200[else]28800[/if];
+crm.prefcache = {global:[],school:[],user:[]}
+crm.prefcache.global['districtstate'] = "~[displaypref:districtstate]";
+crm.prefcache.global['allow_expanded_tlist_sql'] = "~[displaypref:allow_expanded_tlist_sql]";
+crm.prefcache.global['gvu-CUST_enablecustompageservice'] = "~[displaypref:gvu-CUST_enablecustompageservice]";
+crm.prefcache.global['pdscrmdisable'] = "~[displaypref:pdscrmdisable]";
+crm.prefcache.user['crm_linktarget-U~[x:userid]'] = "~[displaypref:crm_linktarget-U~[x:userid]]";
+crm.prefcache.user['crm_expandtab-U~[x:userid]'] = "~[displaypref:crm_expandtab-U~[x:userid]]";
+crm.prefcache.school['att_recordmodedaily'] = ~[if.prefyearschool.att_recordmodedaily=1]"1"[ELSE]"0"[/if];
+//Store current server values
+crm.current = {
+	userid:'~[x:userid]',
+	schoolid:'~(curschoolid)',
+	yearid:'~(curyearid)',
+	securitygroup:'~[f.table_info;table=Teachers;*Id=~[x:userid];fn=value;dothisfor=ALL;field=group;fieldtype=INT]'
+};
+
+$c(function(){
+	crm.cache.dcid = ~[tlist_sql;SELECT dcid FROM gen WHERE cat='crm' AND name='reportcache' AND rownum <=1;nonemessage=-99]~(f1;l)[/tlist_sql];
+	crm.cache.age = ~[tlist_sql;SELECT trunc( EXTRACT(DAY FROM diff) * 86400 + EXTRACT(HOUR FROM diff) * 3600 + EXTRACT(MINUTE FROM diff) * 60 + EXTRACT(SECOND FROM diff)) as totalsecs
+				FROM(SELECT systimestamp - (date_value + (time1/86400)) as diff FROM gen WHERE cat='crm' AND name ='reportcache' AND value='ALL' AND rownum <=1) x;nonemessage=-1]~(f1;l)[/tlist_sql];
+	if(crm.cache.age ==-1 || crm.cache.age > crm.cache.expirelength){
+		scanReports();
+	}
+	else{
+		getReportCache();
+	}
+	$c('#accordion').accordion({autoHeight:false,collapsible:true});
+	$c('#btnscanreports').button().click(forceRefresh);
+	//Bind parameter changes
+	$c('#param_linkpref').button();
+	$c('#param_linkpref').click(function(){
+		var prefval = $c('label[for=param_linkpref]').hasClass('ui-state-active') ? 1 : 0;
+		var targetval ='';
+		setPref('crm_linktarget-U'+crm.current.userid,prefval,{userid:crm.current.userid});
+		if(prefval==1){
+			targetval='_blank';
+			$c('#param_linkpref').button('option','label','ON');
+		} 
+		else{
+			$c('#param_linkpref').button('option','label','OFF');
+		}
+		$c('#report_container a').each(function(){
+			$c(this).attr('target', targetval);
+		});
+	});
+	$c('#param_pdscrmdisable').button();
+	$c('#param_pdscrmdisable').click(function(){
+		var prefval = $c('label[for=param_pdscrmdisable]').hasClass('ui-state-active') ? 1 : 0;
+		setPref('pdscrmdisable',prefval);
+		if(prefval==1){
+			$c('#param_pdscrmdisable').button('option','label','Static');
+		} 
+		else{
+			$c('#param_pdscrmdisable').button('option','label','Dynamic');
+		}
+		window.location.reload();
+	});
+	$c('#report_container').live("tabsselect",function(event,ui){
+			setPref('crm_expandtab-U'+crm.current.userid, ui.panel.id, {userid:crm.current.userid});
+	});
+});//end jquery.ready
+function processReportData(){
+	$c.each(crm.coredata.categories, function(i, cat){
+		cat.reports = $c.grep(cat.reports, function(item){
+			return !$c.isEmptyObject(item);
+		});
+		$c.each(cat.reports, function(ridx, report){
+			report = $c.extend(true,report, crm.reportDefaults);
+			if(report.headerdata==undefined){return;}
+			//alter tags for cross-browser support
+			report.headerdata = report.headerdata.replace('<title>', '<div id="reporttitle">').replace('</title>', '</div>');//play nice with IE
+			report.headerdata = report.headerdata.replace(/<meta/gi, '<div'); //Alter meta tags to div.  This makes Chrome play nice with the jquery selectors.
+			report.name = $c('#reporttitle',report.headerdata).html();
+			$c('div[name]', report.headerdata).each(function(){
+				switch($c(this).attr('name')){
+					case 'reportname': report.name = $c(this).attr('content');
+					break;
+					case 'author': report.author = $c(this).attr('content');
+					break;
+					case 'description':	report.description = $c(this).attr('content');
+					break;
+					case 'version':	report.version = $c(this).attr('content');
+					break;
+					case 'hide': report.hidden = true;
+					break;
+					case 'schoolreport': report.schoolonly = true;
+					break;
+					case 'districtreport': report.districtonly = true;
+					break;
+					case 'statereport': report.statereport = $c(this).attr('content');
+					break;
+					case 'querystring': 
+						report.querystring = $c(this).attr('content');
+					break;
+					case 'preview': 
+						report.previewsource = $c(this).attr('content');
+					break;
+					case 'require_pref':
+						report.require_pref = $c(this).attr('content');
+						var tempSplit = $c(this).attr('content').split(':');
+						if(tempSplit.length ==2){ report.requires.prefs.push({name:tempSplit[0],value:tempSplit[1]}); }
+					break;
+					case 'match_securitygroup':
+						report.matchrules.securitygroup = $c(this).attr('content');
+					break;
+					case 'match_schoolid':
+						report.matchrules.schoolid = $c(this).attr('content');
+					break;
+					case 'match_pref':
+						report.matchrules.pref = $c(this).attr('content');
+					break;
+					case 'match_schoolpref':
+						report.matchrules.schoolpref = $c(this).attr('content');
+					break;
+					case 'match_userpref':
+						report.matchrules.userpref = $c(this).attr('content');
+					break;
+					case 'match_tlistsql':
+						report.matchrules.sql = $c(this).attr('content');
+					break;
+					default:
+						report.other[$c(this).attr('name')] = $c(this).attr('content');
+				}
+			});
+		});
+	});
+}
+function displayError(msg){
+	$c('#error_container').html('<div id="alertmsg" style="padding: 0pt 0.7em;" class="ui-state-error ui-corner-all"><p><span style="float: left; margin-right: 0.3em;" class="ui-icon ui-icon-alert"></span><strong>Alert: </strong>'+msg+'</p></div>').show();
+}
+function forceRefresh(){
+	$c('#report_container').tabs("destroy");
+	$c('#report_container').empty().append('<ul></ul>');
+	$c('#error_container').hide();
+	$c('#loading_container').show();
+	scanReports();
+}
+function createReportCache(){
+	$c.ajax({
+		url:'/admin/reports/c_reportmanager/cache.html',
+		type:'GET',
+		data:{"action":"getdcid","category":"ALL"}
+	})
+	.done(function(data){
+		var frn = '006'+ (parseFloat(data)).toString();
+		//gather fields for saving to the gen table
+		$c.ajax({
+			url:'/admin/reports/c_reportmanager/cache.html',
+			type:'POST',
+			dataType:"text json",
+			dataFilter:function(data){
+				data = data.replace(/[\r\n\t]/g, '');
+				return data;
+			},
+			data:{'action':'getparams','frn':frn,"category":"ALL"}
+		})
+		.fail(function(xhr, status, error){
+				alert('Failed to cache report list.<br />Response Status: '+status);
+		})
+		.done(function(options){
+			for(var key in options){
+				if(key.indexOf('-006005') >-1){	options[key] = JSON.stringify(crm.coredata);}
+			}
+			//save the record
+			$c.ajax({
+				url:'/admin/reports/c_reportmanager/cache.html',
+				type:'POST',
+				data:options
+			})
+			.fail(function(xhr, status, error){
+					displayError('Failed to cache report list.<br />Response Status: '+status);
+			});
+		});
+	});
+}
+function scanReports(){
+	var cpmEnabled = getPref('gvu-CUST_enablecustompageservice');
+	var urlSource = (cpmEnabled == "1") ? '/admin/reports/c_reportmanager/crm_cpmfolders.html' :'/admin/reports/c_reportmanager/crm_categoryhelper_json.html';
+	$c.ajax({
+		url: urlSource,
+		type: 'POST',
+		beforeSend: function(x){
+			if(x && x.overrideMimeType){
+				x.overrideMimeType("application/j-son;charset=UTF-8");
+			}
+		},
+		cache:false,
+		dataType:"text json",
+		dataFilter:function(data, type){
+			data = data.replace(/[\r\n\t]/g, '');
+			return data;
+		}
+	})
+	.done(function(data){
+			crm.coredata = data;
+			processReportData();
+			createReportCache();
+			generateReportList();
+	})
+	.fail(function(xhr, status, error){
+			displayError('Failed to retrieve report list.<br />Response Status: '+status);
+	});//end ajax call
+}
+function getReportCache(){
+	$c.ajax({
+		url:'/admin/reports/c_reportmanager/cache.html',
+		type:'POST',
+		data:{"action":"getcache"},
+		dataType:"text json",
+		dataFilter:function(data){
+			data = data.replace(/[\r\n\t]/g, '');
+			return data;
+		}
+	})
+	.fail(function(xhr, status, error){
+			displayError('Failed to retrieve report list.<br />Response Status: '+status);
+	})
+	.done(function(data){
+			crm.coredata = data;
+			generateReportList();
+	});
+}
+
+function reportMatchRules(report){
+//Check settings in report.matchrules object.  If all rule definitions are matched then return true;otherwise false.
+	var retval = true;
+	if(report.matchrules.securitygroup !=''){
+		if(!isSecurityMatch(report.matchrules.securitygroup.split(','))){retval = false;}
+	}
+	if(report.matchrules.schoolid !=''){
+		if(!isSchoolMatch(report.matchrules.schoolid.split(','))){retval = false;}
+	}
+	if(report.matchrules.pref !=''){
+		var s = report.matchrules.pref.split(':');
+		if(s.length ==2 && !getPrefEquals(s[0], s[1])){retval = false;}
+	}
+	if(report.matchrules.schoolpref !=''){
+		var s = report.matchrules.schoolpref.split(':');
+		if(s.length ==2 && !getPrefEquals(s[0], s[1], crm.preftype.school)){retval = false;}
+	}
+	if(report.matchrules.userpref !=''){
+		var s = report.matchrules.userpref.split(':');
+		if(s.length ==2 && !getPrefEquals(s[0], s[1], crm.preftype.user)){retval = false;}
+	}
+	if(report.matchrules.sql !=''){
+		var options = {"query":report.matchrules.sql.replace('^','~'),"match":"1"}
+		$c.ajax({
+			async:false,
+			type:'GET',
+			url:'/admin/reports/c_reportmanager/crm_tlistsqlhelper.html',
+			data:options
+		})
+		.done(function(data){
+			if(data.length>0 && data[0] == 0){retval= false;}
+		});
+	}
+	return retval;
+}
+function reportMatchBasicSettings(report){
+//check schoolonly, districtonly,and districtstate report settings.  Return true if report should be shown;otherwise false.
+	retval = true;
+	if(report.schoolonly ===true && '~(curschoolid)'=='0'){retval = false;}
+	if(report.districtonly ===true && '~(curschoolid)'!='0'){retval = false;}
+	if(report.statereport != '' && report.statereport != '~[displaypref:districtstate]'){retval = false;}
+	return retval;
+}
+
+function generateReportList(){
+	var targetval = (getPref('crm_linktarget-U'+crm.current.userid, {userid:crm.current.userid}) ==1) ? '_blank' : '';
+	var expandCategoryName = getPref('crm_expandcategory-U'+crm.current.userid);
+	$c('#report_container').tabs();
+	$c.each(crm.coredata.categories, function(catidx,cat){
+		var rptCount = 0;
+		var isOddRow = true;
+		var catname = cat.name.toLowerCase();//meow
+		if(filterCategoryBySchool(catname)){return;}
+		if(filterCategoryBySecurityGroup(catname)){return;}
+		catname = catname.substr(0,1).toUpperCase() + catname.substr(1);
+		var category_container_id = 'crm_category_'+catname.toLowerCase();
+		createCategory(catname, category_container_id);
+		$c.each(cat.reports, function(rptidx, report){
+			if(report.name !=null && !report.hidden && reportMatchRules(report) &&reportMatchBasicSettings(report)){
+				report.name = report.name.substr(0,1).toUpperCase() + report.name.substr(1);
+				var authorui = report.author;
+				if(crm.sources[report.author]!=undefined){authorui = '<a href="'+crm.sources[report.author].link+'" target="blank">'+crm.sources[report.author].title+'</a>';}
+				var $creportrow=$c('<tr id="rpt'+report.uniqueid+'">' +
+					'<td><a class="reportlink" href="'+report.pagelink + report.querystring +'" target="'+targetval+'"><span>'+report.name+'</span></a></td>'+
+					'<td>'+report.description+'</td><td>'+authorui+'</td>'+
+					'<td>'+report.version+ '</td><td></td></tr>'
+				);
+				if(report.previewsource !=''){//begin preview render
+					var $cpreview = $c('#preview_icon_template').clone().removeAttr('id').show();
+					var $cpreview_dialog =$c('<div></div>');
+					var previewSource = '';
+					if(report.previewsource.indexOf('/') === -1){//assume preview exists in same folder as the report.
+						previewSource = report.pagelink.substr(0, report.pagelink.lastIndexOf('/')+1)+report.previewsource;
+					}
+					else{
+						previewSource = report.previewsource;
+					}
+					if(/html$c/.test(previewSource)){
+						$cpreview_dialog.load(previewSource);
+					}
+					else{
+						$cpreview_dialog.append('<img src="'+previewSource+'" />');
+					}
+					$cpreview_dialog.dialog({
+						autoOpen:false,
+						title:report.name + ' preview'
+					});
+					$cpreview.click(function(){
+						$cpreview_dialog.dialog('option', 'height',$c(window).height() /2 );
+						$cpreview_dialog.dialog('option', 'width',$c(window).width() /2 );
+						$cpreview_dialog.dialog('isOpen') ? $cpreview_dialog.dialog('close') : $cpreview_dialog.dialog('open');
+					});
+					$creportrow.find('td:last').append($cpreview);
+				}//end preview render
+
+				$c('#'+category_container_id+' > table > tbody').append($creportrow);
+				rptCount++;
+			}//end report row rendering
+		});	//end of category's report array
+		if(rptCount ==0){//remove categories from the list that do not contain any reports
+			$c('#report_container').tabs('remove', category_container_id);
+		}
+	});//end of categories
+	$c('#loading_container').hide();
+	sortCats();
+	parseRequirements();
+	var initialtabid = getPref('crm_expandtab-U'+crm.current.userid,{userid:crm.current.userid});
+	//convert layout into tabs
+	if(initialtabid == "" || $c('#'+initialtabid).length ==0){initialtabid = 0;}
+	$c('#report_container').tabs("option", "selected",initialtabid);
+
+}
+function createCategory(name, id){
+	$c('#report_container').append('<div id="'+id+'" class="ui-tabs-hide"></div>');
+	$c('#'+id).append($c('#reporttable_template').clone().removeAttr('id').show());
+	$c('#report_container').tabs('add', '#'+id, name);
+}
+function parseRequirements(){
+	$c.each(crm.coredata.categories, function(cidx, cat){
+		$c.each(cat.reports, function(ridx, report){
+			if(report.requires==undefined){return;}
+			$c.each(report.requires.prefs, function(pidx, reqpref){
+				if(!getPrefEquals(reqpref.name, reqpref.value)){
+					var $cdialog = createPrefRequiredDialog(reqpref.name, reqpref.value);
+					var $calert = $c('<span class="ui-icon ui-icon-alert button" style="float: left; margin-right: 0.3em;"></span>');
+					$calert.bind("click",function(){
+						$cdialog.dialog('open');
+					});
+					var $creportlink = $c('#rpt'+report.uniqueid+' .reportlink' );
+					$creportlink.addClass('alert');
+					$creportlink.parent().addClass('ui-state-error').prepend($calert);;
+				}
+				else if($c('#rpt'+report.uniqueid+' .reportlink' ).hasClass('alert')){
+					//remove alert from report
+					var $creportlink = $c('#rpt'+report.uniqueid+' .reportlink' );
+					$creportlink.removeClass('alert');
+					$creportlink.parent().removeClass('ui-state-error');
+					$creportlink.parent().find('.ui-icon').remove();
+				}
+			});
+		});
+	});
+	createReportAlert();
+}
+function createReportAlert(){
+	if($c('#report_container .alert').length >0 && $c('#alertmsg_reportpref').length==0){
+		$c('#report_container').before('<div id="alertmsg_reportpref" style="padding: 0pt 0.7em;" class="ui-state-error ui-corner-all"><p><span style="float: left; margin-right: 0.3em;" class="ui-icon ui-icon-alert"></span>		<strong>Alert:</strong> One or more of your reports may not function properly.  Click the error icons for details.</p></div>');
+	}
+	else if($c('#report_container .alert').length ==0 && $c('#alertmsg_reportpref').length==1){
+		$c('#alertmsg_reportpref').remove();
+	}
+}
+function createPrefRequiredDialog(prefname, reqvalue){
+	var $cd = $c('<div></div>')
+	.dialog({
+		autoOpen: false,
+		title: "Preference required!",
+		bgiframe: true,
+		resizable: false,
+		minHeight:0,
+		width:350,
+		modal: true,
+		overlay: {
+			backgroundColor: '#000',
+			opacity: 0.5
+		}
+	});
+	//Set dialog display and buttons based on user's security group
+	if(crm.current.securitygroup ==9){
+		$cd.html('<p><span class="ui-icon ui-icon-alert" style="float:left; margin-right: 7px;"></span>This report requires a preference to be set in order to work properly.</p>'+
+		'<p>Preference Name: '+prefname+'<br />Required Value: '+reqvalue+'</p>' +
+		'<p>As an administrator, you may set this preference to the required value by pressing \'AutoSet Preference\' below.</p>');
+		$cd.dialog('option', 'buttons',{
+				'AutoSet Preference': function() {
+					setPref(prefname, reqvalue);
+					parseRequirements();//scan all required preferences and toggle alerts for all reports
+					if($c('#report_container .alert').length ==0){$c('#reportmessage').remove();}//no more alerts so clear message
+					$c(this).dialog('close');
+				},
+				Cancel: function() {$c(this).dialog('close');}
+		});
+	}
+	else{
+		$cd.html('<p><span class="ui-icon ui-icon-alert" style="float:left; margin-right: 7px;"></span>This report requires a preference to be set in order to work properly.</p>'+
+		'<p>Preference Name: '+prefname+'<br />Required Value: '+reqvalue+'</p>' +
+		'<p>Only an administrator is allowed to alter the preference from this screen.</p>');
+		$cd.dialog('option', 'buttons',{Ok: function() {$c(this).dialog('close');}});
+	}
+	return $cd;
+}
+function setPref(name, value, options){
+	if(options ==undefined){options={};}
+	$c.extend(options, {request:'setpref',prefname:name,prefvalue:value});
+	$c.ajax({
+		async:false,
+		type:'POST',
+		url:'/admin/reports/c_reportmanager/crm_prefhelper.html',
+		data:options,
+		success:function(data){
+			//cache value for future use
+			if(options.schoolid !=undefined){
+				crm.prefcache.school[name]=value;
+			}
+			else if (options.userid !=undefined){
+				crm.prefcache.user[name]=value;
+			}
+			else {
+				crm.prefcache.global[name] = value;
+			}
+		}
+	});
+}
+function getPref(name, options){
+	if(options ==undefined){options={};}
+	var retval;
+	var preftype;
+	if(options.schoolid !=undefined){
+		preftype =crm.preftype.school;
+	}
+	else if (options.userid !=undefined){
+		preftype =crm.preftype.user;
+	}
+	else {
+		preftype =crm.preftype.global;
+	}
+	retval = getPrefFromCache(name, preftype);
+	if(retval ==undefined){
+		$c.extend( options,{request:'getpref',prefname:name}); //merge both objects
+		$c.ajax({
+			async:false,
+			url:'/admin/reports/c_reportmanager/crm_prefhelper.html',
+			type:'POST',
+			data:options,
+			success:function(data){
+				retval=data;
+				//cache result for future use
+				if(options.schoolid !=undefined){
+					crm.prefcache.school[name]=retval;
+				}
+				else if (options.userid !=undefined){
+					crm.prefcache.user[name]=retval;
+				}
+				else {
+					crm.prefcache.global[name] = retval;
+				}
+			}
+		});
+	}
+	return retval;
+}
+function getPrefFromCache(name, preftype){
+	if(preftype == crm.preftype.school){
+		cache=crm.prefcache.school;
+	}
+	else if(preftype == crm.preftype.user){
+		cache=crm.prefcache.user;
+	}
+	else{
+		cache=crm.prefcache.global;
+	}
+	return cache[name];
+}
+function getPrefEquals(name, value, preftype){
+	var options ={};
+	switch(preftype){
+		case crm.preftype.school:
+			options = {schoolid:crm.current.schoolid};
+		break;
+		case crm.preftype.user:
+			options={userid:crm.current.userid};
+		break;		
+		default:
+	}
+	return (value === getPref(name, options));
+}
+function sortCats(){
+	$c('.reportcat').each(function(i){
+		var rows = new Array();
+		$c(this).nextAll().each(function(){//gather rows within a category
+			if($c(this).hasClass('reportspacer')){return false;}
+			rows.push(this);		
+		});
+		rows.sort(function(a, b){//sort rows based on hyperlinked report name
+			var keyA = $c(a).find('a').text();
+			var keyB = $c(b).find('a').text();
+			if(keyA<keyB){return -1;}
+			else if (keyA>keyB){return 1;}
+			else{return 0;}
+		});
+		$c.each(rows, function(i){//reapply row color classes to the sorted rows
+			$c(this).removeClass('oddrow evenrow').addClass( i % 2 ? 'evenrow' : 'oddrow');
+		});
+		$c(this).after(rows);
+	});
+}
+function isSchoolMatch(schoolArray){
+/*
+Description: Check if current schoolid matches a value in the school filter array.  
+Returns: true if current schoolid matches a required schoolid; otherwise false.
+*/
+	var retval = false;
+	if(!$c.isArray(schoolArray)){return false;}
+	$c.each(schoolArray, function(i, schoolid){
+		if(crm.current.schoolid == schoolid){
+			retval = true;
+			return false;//exit loop
+		}
+	});
+	return retval;
+}
+function isSecurityMatch(securityArray){
+/*
+Description: Check if current user security group matches a value in the security group filter array.  
+Returns: true if user matches a required security group; otherwise false.
+*/
+	var retval = false;
+	if(!$c.isArray(securityArray)){return false;}
+	$c.each(securityArray, function(i, groupid){
+		if(crm.current.securitygroup == groupid){
+			retval = true;
+			return false;//exit loop
+		}
+	});
+	return retval;
+}
+function filterCategoryBySecurityGroup(category){
+	var c = category.toLowerCase();
+	for(var key in crm.catfilters.securitygroup){
+		if(c === key.toLowerCase() && $c.isArray(crm.catfilters.securitygroup[c]) ){
+			var filterlist =crm.catfilters.securitygroup[c];
+			var negflag = false;
+			for(var n in filterlist){
+				if(filterlist[n] <0){
+					if(crm.current.securitygroup == Math.abs(filterlist[n])){return false;}
+					negflag = true;
+				}
+				else{
+					if($c.inArray(crm.current.securitygroup, filterlist[n])){return true;}
+				}
+			}
+			if(negflag){return true;}
+		}
+	}
+	return false;
+}
+function filterCategoryBySchool(category){
+	var c = category.toLowerCase();
+	//Check all filter
+	if(crm.catfilters.school['*'] !==undefined){
+		if ($c.inArray(c, crm.catfilters.school['*']) != -1){return true;}
+	}
+	//Check report categories to filter for non-district schools
+	if(crm.current.schoolid !=0 && crm.catfilters.school['-0'] !==undefined){
+		if ($c.inArray(c, crm.catfilters.school['-0']) != -1){return true;}
+	}
+	//Check category filter for specific school numbers
+	if(crm.catfilters.school[crm.current.schoolid] !==undefined){
+		if ($c.inArray(c, crm.catfilters.school[crm.current.schoolid]) != -1){return true;}
+	}
+	return false;
+}
+function checkSession(data){
+	var test = $c("input[name='pstoken']",data);
+	if(test.size() ==1){top.location.href="/~[directory]/pw.html";}//session timed out, load the login page.
+}
+
+</script>
+~[wc:commonscripts]
+</head>
+
+<body>
+<img id="preview_icon_template" title="Preview" alt="Preview" class="button" style="display:none;" src="/images/icon-attributes.gif" />
+~[wc:admin_header_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a href="/admin/reports/home.html">Reports</a> &gt; Custom ~[if.is.a.school]School[else]District[/if.is.a.school] Level Reports<!-- breadcrumb end -->~[wc:admin_navigation_css]
+
+<!-- start of title -->
+<h2>Custom Reports</h2>
+<!-- end of title -->
+
+~[SetPostValue:repType=customreports]
+~[x:insertfile;reporttabs.html]
+
+<!-- start of content and bounding box -->
+<div class="rounded_block">
+<!--Begin content-->
+<div id="maincontent_container">
+<div id="loading_container">Loading Reports...<img src="/images/busy_blue.gif" /></div>
+<div id="error_container"></div>
+
+<div id="report_container" class="ui-tabs"><ul></ul></div>
+
+<table style="display:none;" id="reporttable_template" border="0" cellspacing="0" cellpadding="4" width="100%">
+	<tbody>
+		<tr class="ui-state-active headerrow reportcat">
+			<td style="width:20%;">Report Title</td>
+			<td style="width:55%;">Description</td>
+			<td style="width:10%;">Source</td>
+			<td style="width:10%;">Version</td>
+			<td style="width:5%;">Options</td>
+		</tr>	
+	</tbody>
+</table>
+<!--Start report settings-->
+<div id="accordion">
+<h4><a href="#">Custom Report Settings</a></h4>
+<div id="userparams">
+<span>Links open in new tab:</span><input type="checkbox" name="userpref1" id="param_linkpref" value="1"~[if.pref.crm_linktarget-U~[x:userid]=1]checked="checked"[/if] />
+<label for="param_linkpref">~[if.pref.crm_linktarget-U~[x:userid]=1]ON[else]OFF[/if]</label>
+~[if#ugnine.~[f.table_info;table=Teachers;*Id=~[x:userid];fn=value;dothisfor=ALL;field=group;fieldtype=INT]=9]
+<span>Use Dynamic or Static Report Bundle Menu:</span><input type="checkbox" name="pdscrmdisable" id="param_pdscrmdisable" value="1"~[if#disable.pref.pdscrmdisable=1]checked="checked"[/if#disable] />
+<label for="param_pdscrmdisable">~[if#disable.pref.pdscrmdisable=1]Static[else#disable]Dynamic[/if#disable]</label>
+<div id="userparams">
+<button id="btnscanreports">Rescan Reports</button>
+</div>
+[/if#ugnine]
+</div>
+</div>
+<!--End report settings-->
+</div>
+<!--End content-->
+</div>
+<br />
+<!-- end of content of bounding box -->
+
+~[wc:admin_footer_css]
+
+</body>
+</html><!-- non framed -->

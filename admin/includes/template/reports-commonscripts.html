@@ -1,0 +1,92 @@
+~[SetPostValue:dateformat=MM/DD/YYYY]
+<script type="text/javascript">
+var submitOnce_shouldShow = false;
+function convertOracleDF(dateformat){
+	//This function converts oracle date formats into the date format used by the jQuery UI datepicker
+	dateformat = dateformat
+		.toLowerCase()
+		.replace(/yy/g, 'y')
+		.replace(/dy/g,'D')
+		.replace(/day/g,'DD');
+	return dateformat;
+}
+function getUrlParams(url){//returns object containing key:value pairs of url parameters found in url
+	var results = {};
+	var pairs = url.slice(url.indexOf('?') + 1).split('&');
+	for(var i = 0;i < pairs.length; i++){
+		var p = pairs[i].split('=');
+		if(p.length ==2){
+			results[p[0]] = p[1];
+		}
+	}
+	return results;
+}
+// Replace the normal jQuery getScript function with one that supports
+// debugging and which references the script files as external resources
+// rather than inline.
+jQuery.extend({
+   getScript: function(url, callback) {
+	  var head = document.getElementsByTagName("head")[0];
+	  var script = document.createElement("script");
+	  script.src = url;
+	  // Handle Script loading
+	  {
+		 var done = false;
+		 // Attach handlers for all browsers
+		 script.onload = script.onreadystatechange = function(){
+			if ( !done && (!this.readyState ||
+				  this.readyState == "loaded" || this.readyState == "complete") ) {
+			   done = true;
+			   if (callback)
+				  callback();
+			   // Handle memory leak in IE
+			   script.onload = script.onreadystatechange = null;
+			}
+		 };
+	  }
+	  head.appendChild(script);
+	  // We handle everything using the script element injection
+	  return undefined;
+   }
+});
+
+(function($){
+	$.fn.serializeObject = function()
+	{
+		var o = {};
+		var a = this.serializeArray();
+		$.each(a, function() {
+			if (o[this.name]) {
+				if (!o[this.name].push) {
+					o[this.name] = [o[this.name]];
+				}
+				o[this.name].push(this.value || '');
+			} else {
+				o[this.name] = this.value || '';
+			}
+		});
+		return o;
+	};
+})(jQuery);
+function selectStudents(action, collectClass) {
+  if(typeof loadingDialog == "function"){loadingDialog();}
+	if(!collectClass) collectClass = 'studentIDs';
+  if(!action) action = 'replace';
+	var curSelect = jQuery.unique(jQuery('.'+collectClass).map(function() {return "ids=" + jQuery(this).val();})).get().join('&');
+	curSelect = curSelect + '&selectionAction='+ action +'&temp=false';
+	jQuery.ajax({
+		type: "POST",
+		url:  "/admin/SaveSelectedStudentsToSelection.action",
+		cache: false,
+		data: curSelect.replace(/ids=&/gi,''),
+		success: function(){
+		window.location = "/admin/studentlist/functions.html";
+		},
+		error: function(){
+		if(typeof closeLoading == "function"){closeLoading();}
+		jQuery('body').append('<div id="curSelectFail" title="Error"><p>There was a error making the students the current selection.</p></div>');
+		jQuery("#curSelectFail").dialog();
+		}
+	}); 
+};
+</script>

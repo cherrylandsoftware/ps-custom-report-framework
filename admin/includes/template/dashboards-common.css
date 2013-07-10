@@ -1,0 +1,16 @@
+/*Dashboard Portlets*/
+#portletHeader { 
+	max-width:450px;
+	float:left; 
+	text-align:left;
+	font-weight:bold;
+	font-size:small;
+	margin:1px;
+} 
+#portletClose { 
+	width:35px; 
+	float:right; 
+	text-align:right;
+	font-weight:bold;
+	margin:1px; 
+} 

@@ -1,0 +1,17 @@
+~[f.array;name=filelist;fn=create;delim=,;elem_type=TEXT;value=~[f.file;fn=doclist;path={{customdatadir}}web_root\admin\reports\~(v.category)\;delim=,;filetype=HTML]]
+~[duplicate;~[f.array;name=filelist;fn=count];zz;count;counterstart=1]
+~(f.variable_set;name=fullpath;value=~(v.categorypath)~[f.array;name=filelist;fn=value;index=zz];)
+~[if#filetest.~[f.file;fn=test;path=~(v.fullpath)]#-43]
+{
+	"uniqueid":"~(v.uniqueidx)",~(f.variable_set;name=uniqueidx;value=~(f.add;1;~(v.uniqueidx)))
+	"pagelink":"/admin/reports/~(v.category)/~[f.array;name=filelist;fn=value;index=zz]",
+	"requires":{"prefs":[],"versionmin":""},
+	~(f.variable_set;name=filehandle;value=~(f.file;fn=open;path=~(v.fullpath);filetype=;mode=read))
+	~(f.variable_set;name=voidbuffer;value=~(f.file;fn=read;ref=~(v.filehandle);read_variable=buffer2;delim=[CRM BEGIN];))
+	~(f.variable_set;name=voidbuffer;value=~(f.file;fn=read;ref=~(v.filehandle);read_variable=buffer2;delim=[CRM END];))
+	"headerdata":"<div>~(v.buffer2;replace=",\")</div>"
+	~(f.file;fn=close;ref=~(v.filehandle))
+}
+[/if#filetest]
+~[if#endreportlist.~[f.array;name=filelist;fn=count]=zz][else#endreportlist],[/if#endreportlist]
+[/duplicate]

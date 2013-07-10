@@ -1,0 +1,29 @@
+{"categories":[
+~[tlist_sql;
+SELECT
+case when lag(x.foldername) over (order by rownum) = x.foldername then null else '{"name"'||chr(58)||'"'||x.foldername||'","reports"'||chr(58)||chr(91) end reportstart,
+rownum uniqueid,
+x.pagelink,
+replace(replace(replace(replace(REGEXP_REPLACE(x.pagehead, CHR(94)|| '.*CRM\sBEGIN\'||CHR(93)||CHR(45)||'->(.*)<!-'||CHR(45)||'\'||CHR(91)||'CRM\sEND.*$','\1', 1,0,'n'), '"','\"'),chr(13)||chr(10)),chr(13)),chr(10)) headerdata,
+case when lead(x.foldername) over (order by rownum) = x.foldername then ',' else chr(93)||'}'||case when lead(rownum) over (order by rownum) is not null then ',' end end reportend
+FROM(
+SELECT
+f.foldername,
+(REGEXP_REPLACE(lower(f.cpmpath), CHR(94)||'\./web_root(.*)$','\1') ||'/'|| a.name) pagelink,
+to_char(DBMS_LOB.substr(ac.clob_content,DBMS_LOB.instr(ac.clob_content,'CRM END')+20,1)) pagehead
+FROM psm_asset a
+JOIN psm_assetcontent ac ON ac.asset_id = a.id AND ac.clob_content IS NOT NULL AND lower(ac.status) = 'a' AND DBMS_LOB.instr(ac.clob_content,'CRM BEGIN')>1 and DBMS_LOB.instr(ac.clob_content,'CRM END')>1 
+JOIN
+(SELECT id, '.' ||sys_connect_by_path(name, '/') as cpmpath, name AS foldername
+FROM psm_assetfolder WHERE level between 1 and 5 and connect_by_root lower(name) = 'web_root' CONNECT BY PRIOR id = parentassetfolder_id ORDER BY level, cpmpath
+) f ON f.id = a.assetfolder_id
+WHERE regexp_like(lower(f.cpmpath), CHR(94)||'\./web_root/admin/reports/'||CHR(91)||CHR(94)||'/'||CHR(93)||'+$')
+AND lower(foldername) != 'c_reportmanager'
+order by f.foldername
+) x]~(reportstart)
+{
+"uniqueid":"~(uniqueid)",
+"pagelink":"~(x.pagelink)",
+"requires":{"prefs":[],"versionmin":""},
+"headerdata":"<div>~(headerdata)</div>"
+}~(reportend)[/tlist_sql]]}
