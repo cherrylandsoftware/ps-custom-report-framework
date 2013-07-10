@@ -37,22 +37,23 @@
  * TableTools container element and styles applying to all components
  */
 div.DTTT_container {
-	/*float: left;*/
-}
-
-button.DTTT_button,.ui-buttonset button.DTTT_button  {
 	position: relative;
 	float: left;
-	height: 24px;
+}
+
+.DTTT_button {
+	position: relative;
+	float: left;
 	margin-right: 3px;
-	/*padding: 3px 10px;*/
+	padding: 3px 10px;
 	border: 1px solid #d0d0d0;
 	background-color: #fff;
+	color: #333 !important;
 	cursor: pointer;
 	*cursor: hand;
 }
 
-button.DTTT_button::-moz-focus-inner { 
+.DTTT_button::-moz-focus-inner { 
 	border: none !important;
 	padding: 0;
 }
@@ -68,36 +69,36 @@ table.DTTT_selectable tbody tr {
 	*cursor: hand;
 }
 
-tr.DTTT_selected.odd {
+table.dataTable tr.DTTT_selected.odd {
 	background-color: #9FAFD1;
 }
 
-tr.DTTT_selected.odd td.sorting_1 {
+table.dataTable tr.DTTT_selected.odd td.sorting_1 {
 	background-color: #9FAFD1;
 }
 
-tr.DTTT_selected.odd td.sorting_2 {
+table.dataTable tr.DTTT_selected.odd td.sorting_2 {
 	background-color: #9FAFD1;
 }
 
-tr.DTTT_selected.odd td.sorting_3 {
+table.dataTable tr.DTTT_selected.odd td.sorting_3 {
 	background-color: #9FAFD1;
 }
 
 
-tr.DTTT_selected.even {
+table.dataTable tr.DTTT_selected.even {
 	background-color: #B0BED9;
 }
 
-tr.DTTT_selected.even td.sorting_1 {
+table.dataTable tr.DTTT_selected.even td.sorting_1 {
 	background-color: #B0BED9;
 }
 
-tr.DTTT_selected.even td.sorting_2 {
+table.dataTable tr.DTTT_selected.even td.sorting_2 {
 	background-color: #B0BED9;
 }
 
-tr.DTTT_selected.even td.sorting_3 {
+table.dataTable tr.DTTT_selected.even td.sorting_3 {
 	background-color: #B0BED9;
 }
 
@@ -119,11 +120,13 @@ div.DTTT_collection {
 }
 
 div.DTTT_collection_background {
-	background: url(/scripts/tabletools/images/background.png) repeat top left;
+	background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAIAAAF1CoEkAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6ODA2RUFGNUIxMDNBMTFFMDhFM0JCMDYyOEU0NjA2OTkiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6ODA2RUFGNUMxMDNBMTFFMDhFM0JCMDYyOEU0NjA2OTkiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MDZFQUY1OTEwM0ExMUUwOEUzQkIwNjI4RTQ2MDY5OSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo4MDZFQUY1QTEwM0ExMUUwOEUzQkIwNjI4RTQ2MDY5OSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/Pvkh0zcAAAAkSURBVHjaYmBgYAAIIBACCCAoAgggGAIIIAQCCCCsCCDACCEAAFYAAdxln20AAAAASUVORK5CYII=) repeat top left;
 	z-index: 2001;
 }
 
-div.DTTT_collection button.DTTT_button {
+div.DTTT_collection button.DTTT_button,
+div.DTTT_collection div.DTTT_button,
+div.DTTT_collection a.DTTT_button {
 	float: none;
 	width: 100%;
 	margin-bottom: -0.1em;
@@ -136,7 +139,7 @@ div.DTTT_collection button.DTTT_button {
  */
 
 .DTTT_print_info {
-	position: absolute;
+	position: fixed;
 	top: 50%;
 	left: 50%;
 	width: 400px;
