@@ -5,7 +5,7 @@
 <link href="/images/css/screen.css" rel="stylesheet" media="screen">
 <link href="/images/css/print.css" rel="stylesheet" media="print">
 ~[if.pref.pdscrmdisable=1]~[redirect:/admin/reports/customreports_static.html][/if]
-<link rel="stylesheet" href="/images/css/theme/dark-hive/jquery-ui.custom.css" type="text/css">
+<link rel="stylesheet" href="/images/css/theme/cr-base/jquery-ui.custom.css" type="text/css">
 <style type="text/css" >
 #report_container ul {
   padding: 0.2em 0.2em 0;
@@ -716,8 +716,6 @@ function checkSession(data){
 <span>Links open in new tab:</span><input type="checkbox" name="userpref1" id="param_linkpref" value="1"~[if.pref.crm_linktarget-U~[x:userid]=1]checked="checked"[/if] />
 <label for="param_linkpref">~[if.pref.crm_linktarget-U~[x:userid]=1]ON[else]OFF[/if]</label>
 ~[if#ugnine.~[f.table_info;table=Teachers;*Id=~[x:userid];fn=value;dothisfor=ALL;field=group;fieldtype=INT]=9]
-<span>Use Dynamic or Static Report Bundle Menu:</span><input type="checkbox" name="pdscrmdisable" id="param_pdscrmdisable" value="1"~[if#disable.pref.pdscrmdisable=1]checked="checked"[/if#disable] />
-<label for="param_pdscrmdisable">~[if#disable.pref.pdscrmdisable=1]Static[else#disable]Dynamic[/if#disable]</label>
 <div id="userparams">
 <button id="btnscanreports">Rescan Reports</button>
 </div>
