@@ -1,0 +1,134 @@
+~[if#pageaction.~[gpv:action]=]
+<!DOCTYPE html>
+<html>
+<head>
+<!--[CRM BEGIN]-->
+<title>TODO:BROWSER TITLE</title>
+<meta name="author" content="" />
+<meta name="description" content="" />
+<meta name="version" content="3.4.0" />
+<meta name="schoolreport" />
+<meta name="hide" /><!--TODO:REMOVE HIDDEN FLAG-->
+<!--[CRM END]-->
+<link href="/images/css/screen.css" rel="stylesheet" media="screen">
+<link href="/images/css/print.css" rel="stylesheet" media="print">
+<link rel="stylesheet" href="/images/css/theme/crm-css/jquery-ui.custom.css" type="text/css">
+<link rel="stylesheet" href="/admin/reports/includes/template/reports-common.css" type="text/css" media="all">
+<link rel="stylesheet" href="/admin/reports/includes/template/reports-printable.css" type="text/css" media="print">
+~[x:insertfile;/scripts/custom-jquery-1.0.html]
+~[x:insertfile;/scripts/custom-datatables-1.0.html]
+~[x:insertfile;/admin/reports/includes/template/reports-commonscripts.html]
+<script type="text/javascript">
+(function($){
+	var reportdataURL ='/~[self]';
+	var pageseperator ='<hr class="noprint pageseperator" /><div class="pbreak"><span style="display: none">&nbsp;</span></div>';
+	var totalreports = 0;
+
+	$(function(){
+		$('#params_container').accordion({collapsible:true,autoHeight:false});
+		$('input:submit').button({text:"Submit"});
+		$('.datepicker').datepicker({
+			dateFormat: convertOracleDF('~[gpv:dateformat]')
+		});
+		$('#ui-datepicker-div').hide();//Bug in jQuery UI 1.8.9 causes datepicker div to be visible upon creation
+		$('#params').submit(function(){
+			clearError();
+			$("#reportresult").empty();
+			$("#reportresult").html('<span id="loader">Loading <img src="' +$("#busyimage").attr("src")+'" /></span>');
+			var settings = $('#params').serializeObject();
+	/*	TODO:  Use this block for fetching a simple block of HTML data
+			$.get(reportdataURL, settings
+			)
+			.done(processReportResults)
+			.fail(function(xhr, status, error){
+				$('#loader').hide();
+				displayError("Report failed to load. Status Message: " +status);
+			});
+	*/
+
+	/* TODO Use this block for fetching JSON formatted data
+			$.ajax({
+				type:"GET",
+				async:true,
+				url:reportdataURL,
+				beforeSend: function(x){
+					if(x && x.overrideMimeType){
+						x.overrideMimeType("application/j-son;charset=UTF-8");
+					}
+				},
+				dataType:"text json",
+				dataFilter:function(data){
+					data = data.replace(/[\r\n\t]/g, '');
+					return data;
+				},
+				data: settings
+			})
+			.fail(function(xhr, status, error){
+					$('#loader').hide();
+					displayError("Report failed to load. Status Message: " +status);
+			})
+			.done(processResults);
+	*/
+			return false; //override regular form submission
+		});
+	});//end jquery.ready
+	  
+	function processReportResults(data){
+		$('#reportresult').html(data);
+		$('#reportresult table').addClass('display').dataTable({
+			"bPaginate": false,
+			"bFilter": false,
+			"bJQueryUI": true,
+			"sDom": 'T<"H"fr>t<"F"ip>',
+			"oTableTools": {
+				"sSwfPath":"/scripts/tabletools/swf/copy_cvs_xls_pdf.swf"
+			}
+		});
+	}
+	function displayError(msg){
+		$('#error_container').html('<div id="alertmsg" style="padding: 0pt 0.7em;" class="ui-state-error ui-corner-all"><p><span style="float: left; margin-right: 0.3em;" class="ui-icon ui-icon-alert"></span><strong>Alert: </strong>'+msg+'</p></div>').show();
+	}
+	function clearError(){
+		$('#error_container').empty().hide();
+	}
+})(jQuery);
+</script>
+~[wc:commonscripts]
+</head>
+
+<body>
+~[x:insertfile;/admin/reports/includes/template/admin_reportheader_start.html]
+ TODO:BREADCRUMB NAME
+~[x:insertfile;/admin/reports/includes/template/admin_reportheader_end.html]
+
+<!-- Begin content -->
+<img id="busyimage" style="display:none;" src="/images/busy_blue.gif" />
+	
+<div id="reportcontent" class="rounded_block">
+<h1 class="noprint">TODO:REPORT NAME</h1>
+
+<!-- Begin report parameters-->
+<form class="noprint" name="params" id="params" method="GET" action="#" target="_blank">
+<div id="params_container" class="noprint">
+	<h3><a href="#">Report Parameters</a></h3>
+	<div id="paramsinner_container">
+		TODO:REPORT PARAMETERS
+		<input type="hidden" name="dothisfor" value="selected" />
+		<input type="hidden" name="action" value="getresults" />
+		<input type="hidden" name="dateformat" value="~[gpv:dateformat]" />
+		<input value="Submit" type="submit" />
+	</div>
+</div>
+</form>
+<!-- End report parameters-->
+<div id="error_container"></div>
+<div id="reportresult" class="rounded_block">Waiting for report parameters.</div>
+</div><!-- end content -->
+<!--TODO: Remove this line on non-core reports, or uncomment and add tilde [x:insertfile;/admin/reports/includes/template/pds_copyright_footer.html] -->
+</body>
+</html>
+[else#pageaction]
+~[if#action.~[gpv.action]=getresults]
+<!--TODO: Add report results output -->
+[/if#action]
+[/if#pageaction]
