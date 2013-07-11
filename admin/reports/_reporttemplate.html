@@ -129,6 +129,17 @@
 </html>
 [else#pageaction]
 ~[if#action.~[gpv.action]=getresults]
-<!--TODO: Add report results output -->
+<!--TODO: Add report results output 
+ex:
+<table>
+	<thead><tr><th>Col1</th><th>Col2</th></tr></thead>
+	<tbody>
+	~ [tlist_sql;QUERY;]
+		<tr><td>~ (col1;t)</td><td>~ (col2;t)</td></tr>
+	[/tlist_sql]
+	</tbody>
+</table>
+
+-->
 [/if#action]
 [/if#pageaction]

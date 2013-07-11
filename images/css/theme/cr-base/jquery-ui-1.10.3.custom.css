@@ -800,7 +800,7 @@ body .ui-tooltip {
 	font-size: 1em;
 }
 .ui-widget-content {
-	border: 1px solid #a6c9e2;
+	border: 1px solid #a6c9e2 !important;
 	background: #fcfdfd url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAABkEAIAAACY3hF0AAAABmJLR0T///////8JWPfcAAAACXBIWXMAAABIAAAASABGyWs+AAAAYklEQVQoz+3PMQqAMBQE0cmKYJFKRYMJiCAoev/b+cVCSG2ZwuoVAwvLdZmZCQB+voA1d33XItLSipmeXiyMjGJjYsqcJJLcQSKJjUgU+9tWAkEsbnBDHuvweFEhVMTbcnkARNMN2kh7KjEAAAAldEVYdGRhdGU6Y3JlYXRlADIwMTMtMDctMDdUMTk6NTU6MzEtMDc6MDAaVNraAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDEzLTA3LTA3VDE5OjU1OjMxLTA3OjAwawliZgAAAABJRU5ErkJggg==) 50% bottom repeat-x;
 	color: #222222;
 }

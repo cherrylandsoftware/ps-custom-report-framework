@@ -68,7 +68,7 @@ div.tab_content, div.tab_content_sel{
 }
 </style>
 
-~[x:insertfile;/scripts/custom-jquery-1.0.html]
+~[x:insertfile;/scripts/custom-jquery-2.0.html]
 ~[x:insertfile;/scripts/custom-datatables-1.0.html]
 
 <script type="text/javascript" src="/admin/reports/c_reportmanager/config.js"></script>
@@ -130,20 +130,10 @@ $c(function(){
 			$c(this).attr('target', targetval);
 		});
 	});
-	$c('#param_pdscrmdisable').button();
-	$c('#param_pdscrmdisable').click(function(){
-		var prefval = $c('label[for=param_pdscrmdisable]').hasClass('ui-state-active') ? 1 : 0;
-		setPref('pdscrmdisable',prefval);
-		if(prefval==1){
-			$c('#param_pdscrmdisable').button('option','label','Static');
-		} 
-		else{
-			$c('#param_pdscrmdisable').button('option','label','Dynamic');
+	$c('#report_container').on('tabsbeforeactivate',function(event,ui){
+		if(ui.newPanel){
+			setPref('crm_expandtab-U'+crm.current.userid, ui.newPanel.attr('id'), {userid:crm.current.userid});
 		}
-		window.location.reload();
-	});
-	$c('#report_container').live("tabsselect",function(event,ui){
-			setPref('crm_expandtab-U'+crm.current.userid, ui.panel.id, {userid:crm.current.userid});
 	});
 });//end jquery.ready
 function processReportData(){
@@ -408,22 +398,30 @@ function generateReportList(){
 			}//end report row rendering
 		});	//end of category's report array
 		if(rptCount ==0){//remove categories from the list that do not contain any reports
-			$c('#report_container').tabs('remove', category_container_id);
+			$c('a[href="#'+category_container_id+'"]').parent().remove();
+			$c('#'+category_container_id).remove();
+			$c('#report_container').tabs('refresh');
 		}
 	});//end of categories
 	$c('#loading_container').hide();
 	sortCats();
 	parseRequirements();
 	var initialtabid = getPref('crm_expandtab-U'+crm.current.userid,{userid:crm.current.userid});
-	//convert layout into tabs
-	if(initialtabid == "" || $c('#'+initialtabid).length ==0){initialtabid = 0;}
-	$c('#report_container').tabs("option", "selected",initialtabid);
+	var tabIndex = 0;
+	if(initialtabid.replace(/s+/g, '') == ""){tabIndex = 0;}
+	else{//find tab based on stored id
+		tabIndex = $c('#report_container a[href="#'+initialtabid+'"]').parent().index();
+	}
+	$c('#report_container').tabs("option", "active",tabIndex);
 
 }
 function createCategory(name, id){
-	$c('#report_container').append('<div id="'+id+'" class="ui-tabs-hide"></div>');
+	var tabs = $c('#report_container').tabs();
+	var ul = tabs.find('ul');
+	$c('<li><a href="#'+id+'">'+name+'</a></li>').appendTo(ul);	
+	tabs.append('<div id="'+id+'"></div>');
 	$c('#'+id).append($c('#reporttable_template').clone().removeAttr('id').show());
-	$c('#report_container').tabs('add', '#'+id, name);
+	tabs.tabs('refresh');
 }
 function parseRequirements(){
 	$c.each(crm.coredata.categories, function(cidx, cat){

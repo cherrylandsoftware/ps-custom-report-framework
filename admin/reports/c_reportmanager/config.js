@@ -20,7 +20,7 @@ crm.preftype.school='s';
 --DEFAULT CONFIG--
 crm.catfilters.school['0'] = ['schedule']; //hide these categories from district
 crm.catfilters.school['-0'] = [''];  //hide these categories from non-district
-crm.catfilters.school['*'] = ['c_reportmanager','sqlreports','includes'];  //hide these categories at all times
+crm.catfilters.school['*'] = ['c_reportmanager','sqlreports','includes','vendor','dashboards'];  //hide these categories at all times
 --END DEFAULT CONFIG--
 */
 crm.catfilters.school = new Array();
