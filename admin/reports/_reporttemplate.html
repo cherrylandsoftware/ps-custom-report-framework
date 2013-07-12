@@ -30,7 +30,7 @@
 		$('.datepicker').datepicker({
 			dateFormat: convertOracleDF('~[gpv:dateformat]')
 		});
-		$('#ui-datepicker-div').hide();//Bug in jQuery UI 1.8.9 causes datepicker div to be visible upon creation
+		
 		$('#params').submit(function(){
 			clearError();
 			$("#reportresult").empty();
@@ -105,26 +105,29 @@
 <img id="busyimage" style="display:none;" src="/images/busy_blue.gif" />
 	
 <div id="reportcontent" class="rounded_block">
-<h1 class="noprint">TODO:REPORT NAME</h1>
+	<h1 class="noprint">TODO:REPORT NAME</h1>
 
-<!-- Begin report parameters-->
-<form class="noprint" name="params" id="params" method="GET" action="#" target="_blank">
-<div id="params_container" class="noprint">
-	<h3><a href="#">Report Parameters</a></h3>
-	<div id="paramsinner_container">
-		TODO:REPORT PARAMETERS
-		<input type="hidden" name="dothisfor" value="selected" />
-		<input type="hidden" name="action" value="getresults" />
-		<input type="hidden" name="dateformat" value="~[gpv:dateformat]" />
-		<input value="Submit" type="submit" />
+	<!-- Begin report parameters-->
+	<form class="noprint" name="params" id="params" method="GET" action="#" target="_blank">
+	<div id="params_container" class="noprint">
+		<h3><a href="#">Report Parameters</a></h3>
+		<div id="paramsinner_container">
+			TODO:REPORT PARAMETERS
+			<input type="hidden" name="dothisfor" value="selected" />
+			<input type="hidden" name="action" value="getresults" />
+			<input type="hidden" name="dateformat" value="~[gpv:dateformat]" />
+			<input value="Submit" type="submit" />
+		</div>
 	</div>
-</div>
-</form>
-<!-- End report parameters-->
-<div id="error_container"></div>
-<div id="reportresult" class="rounded_block">Waiting for report parameters.</div>
-</div><!-- end content -->
-<!--TODO: Remove this line on non-core reports, or uncomment and add tilde [x:insertfile;/admin/reports/includes/template/pds_copyright_footer.html] -->
+	</form>
+	<!-- End report parameters-->
+	<div id="error_container"></div>
+	<div id="reportresult" class="rounded_block">Waiting for report parameters.</div>
+</div><!-- end #reportcontent -->
+</div><!-- end #container(/template/admin_reportheader_start.html) -->
+
+<!--TODO: Add your report copyright here: <p class="disclaimer noprint" style="text-align:center;">&copy; YEAR(s) COPYRIGHT_OWNER All rights reserved.</p> -->
+
 </body>
 </html>
 [else#pageaction]

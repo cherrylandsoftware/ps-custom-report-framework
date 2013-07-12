@@ -1,6 +1,9 @@
 ~[SetPostValue:dateformat=MM/DD/YYYY]
 <script type="text/javascript">
+/*config variables*/
 var submitOnce_shouldShow = false;
+
+/*Helper functions*/
 function convertOracleDF(dateformat){
 	//This function converts oracle date formats into the date format used by the jQuery UI datepicker
 	dateformat = dateformat
@@ -23,7 +26,7 @@ function getUrlParams(url){//returns object containing key:value pairs of url pa
 }
 // Replace the normal jQuery getScript function with one that supports
 // debugging and which references the script files as external resources
-// rather than inline.
+// rather than inline.  This makes debugging scripts easier.
 jQuery.extend({
    getScript: function(url, callback) {
 	  var head = document.getElementsByTagName("head")[0];
@@ -67,26 +70,56 @@ jQuery.extend({
 		});
 		return o;
 	};
+	
+	//bind student selection buttons
+	$(document).on('click', '.selstudents', function(){
+		doStudentSelection(this);
+	});
 })(jQuery);
-function selectStudents(action, collectClass) {
-  if(typeof loadingDialog == "function"){loadingDialog();}
-	if(!collectClass) collectClass = 'studentIDs';
-  if(!action) action = 'replace';
-	var curSelect = jQuery.unique(jQuery('.'+collectClass).map(function() {return "ids=" + jQuery(this).val();})).get().join('&');
-	curSelect = curSelect + '&selectionAction='+ action +'&temp=false';
+		
+
+/* doStudentSelection() - Handles replacing or adding students to the current student selection.
+Params:
+	sender = DOM element containing data elements about how to create a student selection.
+Data elements:
+	data-action: (Optional)  Default='replace'.  
+		When value is 'replace', the current selection will be completely replaced.
+		When value is 'add', the student selection being built will be appended to the session's current student selection.
+	
+	data-target:  (Optional)
+		When set:  Class name of elements that will be scanned for student DCID values.  Elements matched by class name must be input elements with DCID values in the 'value' attribute.
+		When missing:  Looks for list of student DCID values in data-studentids attribute.
+	
+	data-studentids:(Optional)  Used when data-target is missing.
+		Value should be comma separated values representing student DCIDs.
+*/
+function doStudentSelection(sender){
+	if(typeof loadingDialog == "function"){loadingDialog();}
+	var action = $(sender).data('action');
+	if(action != 'replace' || action != 'add'){action = 'replace';}
+	var q = '&temp=false&selectionAction='+action;
+	
+	var collectTarget = $(sender).data('target');
+	if(collectTarget !=undefined){
+		q = jQuery.unique(jQuery('.'+collectTarget).map(function() {return "ids=" + jQuery(this).val();})).get().join('&') + q;
+	}
+	else{
+		var ids = $(sender).data('studentids').split(',');
+		q = $.unique($(ids).map(function() {return "ids=" + this;})).get().join('&') + q;
+	}
 	jQuery.ajax({
 		type: "POST",
-		url:  "/admin/SaveSelectedStudentsToSelection.action",
+		url: "/admin/SaveSelectedStudentsToSelection.action",
 		cache: false,
-		data: curSelect.replace(/ids=&/gi,''),
-		success: function(){
+		data: q.replace(/ids=&/gi,'')
+	})
+	.done(function(){
 		window.location = "/admin/studentlist/functions.html";
-		},
-		error: function(){
+	})
+	.fail(function(){
 		if(typeof closeLoading == "function"){closeLoading();}
 		jQuery('body').append('<div id="curSelectFail" title="Error"><p>There was a error making the students the current selection.</p></div>');
 		jQuery("#curSelectFail").dialog();
-		}
-	}); 
-};
+	});
+}
 </script>
