@@ -63,6 +63,10 @@ hr.pageseperator {
 .dataTables_wrapper {
 	display:inline-block;
 }
+.ui-buttonset .ui-button.DTTT_button {
+    margin: 0 3px;
+}
+
 /*.noprint fixes*/
 tfoot.noprint{
   margin:0;

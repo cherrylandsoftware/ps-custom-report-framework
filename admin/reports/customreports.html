@@ -4,8 +4,9 @@
 <title>Custom ~[if.is.a.school]School[else]District[/if.is.a.school] Level Reports</title>
 <link href="/images/css/screen.css" rel="stylesheet" media="screen">
 <link href="/images/css/print.css" rel="stylesheet" media="print">
-~[if.pref.pdscrmdisable=1]~[redirect:/admin/reports/customreports_static.html][/if]
-<link rel="stylesheet" href="/images/css/theme/cr-base/jquery-ui.custom.css" type="text/css">
+<link rel="stylesheet" href="/images/css/theme/cr-base/jquery-ui-1.10.3.custom.css" type="text/css">
+~[x:insertfile;/scripts/custom-jquery-2.0.html]
+~[x:insertfile;/scripts/custom-datatables-1.0.html]
 <style type="text/css" >
 #report_container ul {
   padding: 0.2em 0.2em 0;
@@ -68,8 +69,6 @@ div.tab_content, div.tab_content_sel{
 }
 </style>
 
-~[x:insertfile;/scripts/custom-jquery-2.0.html]
-~[x:insertfile;/scripts/custom-datatables-1.0.html]
 
 <script type="text/javascript" src="/admin/reports/c_reportmanager/config.js"></script>
 <script type="text/javascript" >
