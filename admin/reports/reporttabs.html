@@ -25,12 +25,30 @@
     	 <a href="~[if.~[gpv:repType]=customdash]#[else]/admin/reports/dashboards/home.html[/if]">Custom Dashboards</a>
     </li>
 <!--check for sqlReports v2.0+ -->
-~[f.variable_create;name=itemexists;type=TEXT;when=NEVER]
-~[f.variable_set;name=itemexists;value=~(f.file;fn=test;path={{customdatadir}}web_root\admin\sqlReports\home.html);]
-~[if#sqltest.~[v.itemexists]=1]
-    <li class="~[if#selected.~[gpv:repType]=customsql]selected[/if#selected]">
-    	 <a href="~[if#selected2.~[gpv:repType]=customsql]#[else#selected2]/admin/sqlReports/home.html[/if#selected2]">Custom SQL Reports</a>
-    </li>
-[/if#sqltest]
+~[if#cpmcheck.~[displaypref:gvu-CUST_enablecustompageservice]=1]
+	~[f.variable_create;name=sqlFieldName;type=TEXT;when=NEVER]
+	~[f.variable_set;name=sqlFieldName;value=SELECT COUNT(*) AS exists FROM psm_assetfolder f WHERE lower(f.cpmpath) LIKE '%sqlreports%']
+	~(f.variable_create;name=sqlHandle;type=INT;when=NEVER;permanent=0)
+	~(f.variable_create;name=DSQL1_exists;type=INT;when=NEVER;permanent=0)
+	~(f.variable_set;name=sqlFieldName;value=[update])
+	~(f.variable_set;name=sqlHandle;value=~(f.DSQL_New;sql=~(v.sqlFieldName)))
+	~(f.DSQL_AddSelectColumn;handle=~(v.sqlHandle);col=e:exists;col_type=INT;var=DSQL1_exists)
+	~(f.DSQL_DoSelect;handle=~(v.sqlHandle))
+	~(f.DSQL_Browse;handle=~(v.sqlHandle);fn=first_rec)
+	~[if#asset.~(v.DSQL1_exists)#1]
+		<li class="~[if#selected.~[gpv:repType]=customsql]selected[/if#selected]">
+			 <a href="~[if#selected2.~[gpv:repType]=customsql]#[else#selected2]/admin/sqlReports/home.html[/if#selected2]">Custom SQL Reports</a>
+		</li>
+	[/if#asset]
+[else#cpmcheck]
+	~[f.variable_create;name=itemexists;type=TEXT;when=NEVER]
+	~[f.variable_set;name=itemexists;value=~(f.file;fn=test;path={{customdatadir}}web_root\admin\sqlReports\home.html);]
+	~[if#sqltest.~[v.itemexists]=1]
+		<li class="~[if#selected.~[gpv:repType]=customsql]selected[/if#selected]">
+			 <a href="~[if#selected2.~[gpv:repType]=customsql]#[else#selected2]/admin/sqlReports/home.html[/if#selected2]">Custom SQL Reports</a>
+		</li>
+	[/if#sqltest]
+[/if#cpmcheck]
+
 </ul>
 <!-- end of tabs -->
