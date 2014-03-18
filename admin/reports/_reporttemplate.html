@@ -16,7 +16,7 @@
 <link rel="stylesheet" href="/admin/reports/includes/template/reports-common.css" type="text/css" media="all">
 <link rel="stylesheet" href="/admin/reports/includes/template/reports-printable.css" type="text/css" media="print">
 ~[x:insertfile;/scripts/custom-jquery-2.0.html]
-~[x:insertfile;/scripts/custom-datatables-1.0.html]
+~[x:insertfile;/scripts/custom-datatables-2.0.html]
 ~[x:insertfile;/admin/reports/includes/template/reports-commonscripts.html]
 <script type="text/javascript">
 (function($){
@@ -81,7 +81,7 @@
 			"bJQueryUI": true,
 			"sDom": 'T<"H"fr>t<"F"ip>',
 			"oTableTools": {
-				"sSwfPath":"/scripts/tabletools/swf/copy_cvs_xls_pdf.swf"
+				"sSwfPath":"//cdn.datatables.net/tabletools/2.2.0/swf/copy_csv_xls_pdf.swf"
 			}
 		});
 	}
